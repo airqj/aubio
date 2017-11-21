@@ -43,6 +43,11 @@ struct _aubio_mfcc_t
   fmat_t *dct_coeffs;       /** DCT transform n_filters * n_coeffs */
 };
 
+static aubio_mfcc_t *mf;
+static uint_t win_s;
+static cvec_t *input;
+static fvec_t *output;
+static float  return_to_jni[39];
 
 aubio_mfcc_t *
 new_aubio_mfcc (uint_t win_s, uint_t n_filters, uint_t n_coefs,
@@ -115,4 +120,38 @@ aubio_mfcc_do (aubio_mfcc_t * mf, const cvec_t * in, fvec_t * out)
   fmat_vecmul(mf->dct_coeffs, mf->in_dct, out);
 
   return;
+}
+
+int args_init(uint_t win_s_jni, uint_t n_filters_jni, uint_t n_coefs_jni,uint_t samplerate_jni)
+{
+    input = new_cvec(win_s_jni);
+    win_s = win_s_jni;
+    output = new_fvec(n_coefs_jni);
+    mf = new_aubio_mfcc(win_s_jni,n_filters_jni,n_coefs_jni,samplerate_jni);
+    return 0;
+}
+
+float * mfcc_compute(float audio_buffer[])
+{
+    uint_t j = 0;
+    /*
+    for(j=0;j < win_s;j++)
+    {
+        input->norm[j] = audio_buffer[j];
+    }
+    */
+    memcpy(input->norm,audio_buffer,win_s * sizeof(float));
+    input->length = win_s;
+    aubio_mfcc_do(mf,input,output);
+    for(j=0;j<39;j++)
+    {
+        return_to_jni[j] = output->data[j];
+    }
+
+    return return_to_jni;
+}
+
+void clean_mf()
+{
+    del_aubio_mfcc(mf);
 }

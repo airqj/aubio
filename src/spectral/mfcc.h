@@ -42,6 +42,8 @@ extern "C"
 {
 #endif
 
+#include <string.h>
+
 /** mfcc object */
 typedef struct _aubio_mfcc_t aubio_mfcc_t;
 
@@ -71,7 +73,11 @@ void del_aubio_mfcc (aubio_mfcc_t * mf);
 
 */
 void aubio_mfcc_do (aubio_mfcc_t * mf, const cvec_t * in, fvec_t * out);
-
+// custom
+int args_init(uint_t win_s_jni, uint_t n_filters_jni, uint_t n_coefs_jni,uint_t samplerate_jni);
+float * mfcc_compute(float audio_buffer[]);
+void clean_mf();
+// custom end
 #ifdef __cplusplus
 }
 #endif
